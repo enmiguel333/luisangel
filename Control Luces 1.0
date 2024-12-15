@@ -1,0 +1,53 @@
+#include <Wire.h>
+#include "Sodaq_DS3231.h"
+
+char DiaSemana[][4] = { "Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab" };
+
+// La linea fija la fecha, hora y dia de la semana, se debe suprimir la linea en la segunda carga
+// Ejemplo 2018 noviembre 11, 08:00:00  dia 6-Sabado (0=Dom, 1=Lun, 2=Mar, 3=Mie, 4=Jue, 5=Vie, 6=Sab)
+ //DateTime dt(2024, 12, 15, 13, 12, 55, 0);
+
+void setup() {
+  pinMode(11, OUTPUT);
+  digitalWrite(11, LOW); // Asegúrate de que el pin esté apagado inicialmente
+
+  Serial.begin(9600);
+
+  rtc.begin();
+  Wire.begin();
+
+  // La linea fija la fecha, hora y dia de la semana, se debe suprimir la linea en la segunda carga
+  // rtc.setDateTime(dt);
+}
+
+void loop() {
+  DateTime now = rtc.now();
+
+  Serial.print("Hora: ");
+  Serial.print(now.hour());
+  Serial.print(":");
+  Serial.print(now.minute());
+  Serial.print(":");
+  Serial.println(now.second());
+
+  delay(1000);
+
+  int hora = now.hour();
+  int minuto = now.minute();
+  int segundo = now.second();
+
+  //////////////////////////luces/////////////////////////////
+
+  /*
+  Lo hice en 2 partes, si hay un corte de luz y cuando llega es antes de las 23:59 enciende de nuevo, 
+  pero si pasa de esa marca no, dividi el codigo y asi al haber algun corte de luz cuando llegue a la hora que sea (que este activa) se activara de igual forma.
+  */
+
+  if ((hora >= 19 && hora < 24) || (hora >= 0 && hora < 6)) {
+    Serial.println("Luces encendidas");
+    digitalWrite(11, HIGH);
+  } else {
+    Serial.println("Luces apagadas");
+    digitalWrite(11, LOW);
+  }
+}
